@@ -8,3 +8,4 @@ urlpatterns = [
     path("movements/", views.movement_list, name="movement_list"),
     path("movements/new/", views.movement_create, name="movement_create"),
 ]
+
