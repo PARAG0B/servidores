@@ -1,4 +1,6 @@
 from django.db import models
+from django.db import models, transaction
+from django.core.exceptions import ValidationError
 
 
 class Warehouse(models.Model):
@@ -42,45 +44,61 @@ class Product(models.Model):
 
 
 class Stock(models.Model):
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.DecimalField("Cantidad", max_digits=12, decimal_places=2, default=0)
+    warehouse = models.ForeignKey("Warehouse", on_delete=models.CASCADE)
+    product = models.ForeignKey("Product", on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ("warehouse", "product")
-        verbose_name = "Existencia"
-        verbose_name_plural = "Existencias"
 
     def __str__(self):
-        return f"{self.warehouse} | {self.product} -> {self.quantity}"
-
-
-MOVEMENT_TYPES = (
-    ("IN", "Entrada"),
-    ("OUT", "Salida"),
-    ("TR", "Transferencia"),
-)
+        return f"{self.warehouse} - {self.product} ({self.quantity})"
 
 
 class Movement(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    warehouse = models.ForeignKey(
-    Warehouse,
-    on_delete=models.PROTECT,
-    null=True,
-    blank=True,
-)
-    movement_type = models.CharField("Tipo", max_length=3, choices=MOVEMENT_TYPES)
-    quantity = models.DecimalField("Cantidad", max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField("Fecha", auto_now_add=True)
-    reference = models.CharField("Referencia", max_length=50, blank=True)
-    notes = models.TextField("Notas", blank=True)
+    IN = "IN"
+    OUT = "OUT"
+    MOVEMENT_TYPES = [
+        (IN, "Entrada"),
+        (OUT, "Salida"),
+    ]
 
-    class Meta:
-        ordering = ["-created_at"]
-        verbose_name = "Movimiento"
-        verbose_name_plural = "Movimientos"
+    warehouse = models.ForeignKey("Warehouse", on_delete=models.PROTECT)
+    product = models.ForeignKey("Product", on_delete=models.PROTECT)
+    movement_type = models.CharField(max_length=3, choices=MOVEMENT_TYPES)
+    quantity = models.PositiveIntegerField()
+    reference = models.CharField(max_length=100, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.get_movement_type_display()} {self.quantity} {self.product} ({self.warehouse})"
+        return f"{self.get_movement_type_display()} {self.quantity} de {self.product} en {self.warehouse}"
 
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        # Solo aplicamos el movimiento al stock cuando es nuevo
+        if is_new:
+            # Bloqueamos/fijamos la fila de stock correspondiente
+            stock, created = Stock.objects.select_for_update().get_or_create(
+                warehouse=self.warehouse,
+                product=self.product,
+                defaults={"quantity": 0},
+            )
+
+            if self.movement_type == self.OUT:
+                # Validar que haya suficiente stock
+                if stock.quantity < self.quantity:
+                    raise ValidationError(
+                        f"No hay stock suficiente en {self.warehouse} para sacar {self.quantity} unidades. "
+                        f"Stock actual: {stock.quantity}."
+                    )
+                stock.quantity -= self.quantity
+            else:
+                # Entrada
+                stock.quantity += self.quantity
+
+            stock.save()
+
+        super().save(*args, **kwargs)
