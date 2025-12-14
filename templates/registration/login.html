@@ -1,0 +1,33 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Iniciar sesión</h1>
+
+{% if form.errors %}
+  <div class="alert alert-danger">
+    Usuario o contraseña incorrectos. Inténtalo de nuevo.
+  </div>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_username" class="form-label">Usuario</label>
+    {{ form.username }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_password" class="form-label">Contraseña</label>
+    {{ form.password }}
+  </div>
+
+  {% if next %}
+    <input type="hidden" name="next" value="{{ next }}">
+  {% endif %}
+
+  <button type="submit" class="btn btn-primary">Entrar</button>
+</form>
+{% endblock %}
