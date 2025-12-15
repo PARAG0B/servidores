@@ -30,7 +30,14 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "72.61.78.228",
+    "app.parawy.win",
+    "parawy.win",
+]
+
 
 CSRF_TRUSTED_ORIGINS = [
     "https://72.61.78.228",
