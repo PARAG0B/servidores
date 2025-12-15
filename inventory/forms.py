@@ -1,19 +1,14 @@
 from django import forms
-from .models import Movement
+from .models import Product, Movement
 
 
 class MovementForm(forms.ModelForm):
     class Meta:
         model = Movement
-        fields = ["warehouse", "product", "movement_type", "quantity", "reference", "notes"]
-        widgets = {
-            "notes": forms.Textarea(attrs={"rows": 3}),
-        }
+        fields = "__all__"   # usamos todos los campos del modelo Movement
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["code", "name", "description", "min_stock", "is_active"]
-        widgets = {
-            "description": forms.Textarea(attrs={"rows": 3}),
-        }
+        fields = "__all__"   # usamos todos los campos del modelo Product
