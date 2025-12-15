@@ -25,11 +25,15 @@ SECRET_KEY = 'django-insecure-jvxulhn1$*q*h$+8$k18+nd2mlgh+_o93f+#6r8ja!a!_k%)e3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = [
-    "72.61.78.228",   # IP pública de tu VPS
     "localhost",
     "127.0.0.1",
+    "72.61.78.228",
+    "app.parawy.win",
+    "parawy.win",
 ]
+
 
 CSRF_TRUSTED_ORIGINS = [
     "https://72.61.78.228",
