@@ -1,0 +1,72 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}{{ product.name }} - Historial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-0">{{ product.name }}</h1>
+    <small class="text-muted">Código: {{ product.code }}</small>
+  </div>
+
+  <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary btn-sm">
+    ← Volver a productos
+  </a>
+</div>
+
+<div class="row mb-3">
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">Información del producto</h6>
+        <p class="mb-1"><strong>Código:</strong> {{ product.code }}</p>
+        <p class="mb-1"><strong>Nombre:</strong> {{ product.name }}</p>
+        <p class="mb-0"><strong>Stock mínimo:</strong> {{ product.min_stock|default:"-" }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    Historial de movimientos
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-sm table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 8%;">ID</th>
+          <th style="width: 18%;">Fecha</th>
+          <th style="width: 15%;">Tipo</th>
+          <th style="width: 12%;">Cantidad</th>
+          <th style="width: 20%;">Bodega</th>
+          <th>Referencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in movements %}
+          <tr>
+            <td>{{ m.id }}</td>
+            <td>
+              {# Si el modelo tiene created_at se verá, si no, queda vacío sin romper #}
+              {{ m.created_at|date:"Y-m-d H:i" }}
+            </td>
+            <td>
+              {{ m.get_movement_type_display|default:m.movement_type }}
+            </td>
+            <td>{{ m.quantity }}</td>
+            <td>{{ m.warehouse }}</td>
+            <td>{{ m.reference }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-3">
+              Este producto aún no tiene movimientos registrados.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

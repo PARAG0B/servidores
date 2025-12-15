@@ -1,0 +1,46 @@
+{% extends "inventory/base.html" %}
+
+{% block title %}Productos - Inventrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Productos</h1>
+  <!-- Si más adelante quieres un formulario de alta de producto, aquí iría el botón -->
+  <!-- <a href="#" class="btn btn-primary btn-sm">Nuevo producto</a> -->
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover table-sm mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 10%;">Código</th>
+          <th>Nombre</th>
+          <th style="width: 15%;">Stock mínimo</th>
+          <th style="width: 10%;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td>{{ product.code }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.min_stock|default:"-" }}</td>
+            <td class="text-end">
+              <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-outline-secondary btn-sm">
+                Ver historial
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-3">
+              No hay productos registrados aún.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

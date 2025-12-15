@@ -8,8 +8,8 @@ from django.http import HttpResponse
 from .models import Stock, Movement
 from .forms import MovementForm
 from django.utils import timezone
-
-
+from django.shortcuts import render, get_object_or_404
+from .models import Product, Movement
 
 @login_required
 def dashboard(request):
@@ -105,3 +105,37 @@ def movement_export_csv(request):
         ])
 
     return response
+
+@login_required
+def product_list(request):
+    """
+    Lista simple de productos. Desde aquí se podrá entrar al historial
+    de cada producto.
+    """
+    products = Product.objects.all().order_by("name")
+    context = {
+        "products": products,
+    }
+    return render(request, "inventory/product_list.html", context)
+
+
+@login_required
+def product_detail(request, pk):
+    """
+    Historial por producto: muestra la info del producto y
+    todos los movimientos asociados.
+    """
+    product = get_object_or_404(Product, pk=pk)
+
+    # Ordenamos por id descendente (id siempre existe)
+    movements = (
+        Movement.objects
+        .filter(product=product)
+        .order_by("-id")
+    )
+
+    context = {
+        "product": product,
+        "movements": movements,
+    }
+    return render(request, "inventory/product_detail.html", context)
