@@ -132,12 +132,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+# Archivos estáticos
 STATIC_URL = "static/"
 
-# Archivos estáticos propios del proyecto (si los usas)
+# Carpeta donde se recogerán todos los estáticos al hacer collectstatic
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# (Opcional) si tienes una carpeta "static" para tus propios archivos
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
-# 🔹 ESTA ES LA LÍNEA IMPORTANTE:
-STATIC_ROOT = BASE_DIR / "staticfiles"
