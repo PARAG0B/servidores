@@ -1,15 +1,15 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.exceptions import ValidationError
+ from django.contrib.auth.decorators import login_required
+ from django.contrib import messages
+ from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
-from django.db.models import Sum
-import csv
-from django.http import HttpResponse
-from .models import Stock, Movement
-from .forms import MovementForm
+ from django.db.models import Sum
+ import csv
+ from django.http import HttpResponse
+ from .forms import MovementForm
 from django.utils import timezone
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Movement
+ from django.shortcuts import render, get_object_or_404
+ from .models import Stock, Movement, Product
+ from django.db import transaction
 
 @login_required
 def dashboard(request):
