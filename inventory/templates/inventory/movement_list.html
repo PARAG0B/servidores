@@ -9,6 +9,19 @@
     Nuevo movimiento
 </a>
 
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<h1>Movimientos</h1>
+
+<div class="mb-3">
+  <a href="{% url 'movement_create' %}" class="btn btn-primary">Nuevo movimiento</a>
+  <a href="{% url 'movement_export_csv' %}" class="btn btn-outline-secondary">
+    Exportar CSV
+  </a>
+</div>
+
+
 <table class="table table-striped">
     <thead>
     <tr>

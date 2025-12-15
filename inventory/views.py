@@ -3,9 +3,12 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.db.models import Sum
-
+import csv
+from django.http import HttpResponse
 from .models import Stock, Movement
 from .forms import MovementForm
+from django.utils import timezone
+
 
 
 @login_required
@@ -57,3 +60,48 @@ def movement_create(request):
 
     return render(request, "inventory/movement_form.html", {"form": form})
 
+@login_required
+def movement_export_csv(request):
+    """
+    Exporta los últimos movimientos a un archivo CSV.
+    """
+    # Creamos la respuesta HTTP con tipo CSV
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="movimientos_inventrack.csv"'
+
+    writer = csv.writer(response)
+
+    # Encabezados
+    writer.writerow([
+        "ID",
+        "Fecha / Hora",
+        "Tipo",
+        "Bodega",
+        "Producto",
+        "Cantidad",
+        "Referencia",
+        "Notas",
+        "Usuario",
+    ])
+
+    # Traemos los movimientos (puedes limitar a 1000 si quieres)
+    movements = (
+        Movement.objects
+        .select_related("warehouse", "product")
+        .order_by("-created_at")
+    )
+
+    for m in movements:
+        writer.writerow([
+            m.id,
+            m.created_at.strftime("%Y-%m-%d %H:%M"),
+            m.get_movement_type_display(),
+            m.warehouse.name if hasattr(m.warehouse, "name") else str(m.warehouse),
+            m.product.name if hasattr(m.product, "name") else str(m.product),
+            m.quantity,
+            m.reference or "",
+            (m.notes or "").replace("\n", " "),  # sin saltos de línea
+            m.created_by.username if hasattr(m, "created_by") and m.created_by else "",
+        ])
+
+    return response
