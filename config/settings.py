@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     "72.61.78.228",
     "app.parawy.win",
     "parawy.win",
+    "tunnel.parawy.win",
 ]
 
 
