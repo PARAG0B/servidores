@@ -9,23 +9,19 @@
     >
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'inventory:dashboard' %}">Inventrack</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'inventory:movement_list' %}">Movimientos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/">Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Salir</a>
-                </li>
-            </ul>
-        </div>
-    </div>
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+  <a class="navbar-brand ms-3" href="{% url 'dashboard' %}">Inventrack</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">Productos</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'movement_list' %}">Movimientos</a></li>
+      <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+    </ul>
+    <ul class="navbar-nav ms-auto me-3">
+      <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Salir</a></li>
+    </ul>
+  </div>
 </nav>
 
 <div class="container mt-3">

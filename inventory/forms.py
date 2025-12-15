@@ -10,3 +10,10 @@ class MovementForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ["code", "name", "description", "min_stock", "is_active"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }

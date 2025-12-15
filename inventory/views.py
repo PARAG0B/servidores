@@ -7,7 +7,7 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import MovementForm
+from .forms import MovementForm, ProductForm
 from .models import Movement, Product, Stock
 
 
@@ -129,3 +129,54 @@ def product_detail(request, pk):
         "movements": movements,
     }
     return render(request, "inventory/product_detail.html", context)
+
+
+
+@login_required
+def product_create(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("product_list")
+    else:
+        form = ProductForm()
+    return render(request, "inventory/product_form.html", {"form": form, "title": "Nuevo producto"})
+
+
+@login_required
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect("product_list")
+    else:
+        form = ProductForm(instance=product)
+    return render(request, "inventory/product_form.html", {"form": form, "title": "Editar producto"})
+
+
+@login_required
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        product.delete()
+        return redirect("product_list")
+    return render(request, "inventory/product_confirm_delete.html", {"product": product})
+
+
+@login_required
+def product_history(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    movements = (
+        Movement.objects
+        .select_related("warehouse", "user")
+        .filter(product=product)
+        .order_by("-created_at")
+    )
+    return render(
+        request,
+        "inventory/product_history.html",
+        {"product": product, "movements": movements},
+    )
