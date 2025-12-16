@@ -1,7 +1,10 @@
 {% extends "inventory/base.html" %}
 
+{% block title %}Eliminar producto{% endblock %}
+
 {% block content %}
-<h1>Eliminar producto</h1>
+<h1 class="mb-4">Eliminar producto</h1>
+
 <p>¿Seguro que deseas eliminar el producto <strong>{{ product.name }}</strong>?</p>
 
 <form method="post">
@@ -10,4 +13,3 @@
   <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
-

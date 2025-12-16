@@ -4,6 +4,7 @@
 
 {% block content %}
 <h1 class="mb-4">Registrar movimiento</h1>
+
 {% if form.non_field_errors %}
   <div class="alert alert-danger">
     {% for error in form.non_field_errors %}
@@ -11,6 +12,7 @@
     {% endfor %}
   </div>
 {% endif %}
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

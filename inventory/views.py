@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import csv
 
+from django.db import transaction
+
 from .models import Stock, Movement, Product
 from .forms import MovementForm, ProductForm
 
@@ -34,26 +36,37 @@ def dashboard(request):
 
 @login_required
 def movement_list(request):
-    # Ahora sí, leemos de la base de datos
-    movements = Movement.objects.all()
+    movements = Movement.objects.select_related(
+        "product"
+    ).order_by("-created_at")
+    return render(
+        request,
+        "inventory/movement_list.html",
+        {"movements": movements},
+    )
 
-    context = {
-        "movements": movements,
-    }
-    return render(request, "inventory/movement_list.html", context)
 
 @login_required
+@transaction.atomic
 def movement_create(request):
     if request.method == "POST":
         form = MovementForm(request.POST)
         if form.is_valid():
             movement = form.save(commit=False)
-            movement.user = request.user
-            movement.save()   # aquí se actualiza el stock
+            # Si tu modelo tiene campo user, lo rellenamos
+            if hasattr(movement, "user") and request.user.is_authenticated:
+                movement.user = request.user
+            movement.save()
+            messages.success(request, "Movimiento registrado correctamente.")
             return redirect("movement_list")
     else:
         form = MovementForm()
-    return render(request, "inventory/movement_form.html", {"form": form})
+
+    return render(
+        request,
+        "inventory/movement_form.html",
+        {"form": form, "title": "Nuevo movimiento"},
+    )
 
 @login_required
 def export_products_csv(request):
@@ -142,37 +155,60 @@ def product_list(request):
     products = Product.objects.all().order_by("name")
     return render(request, "inventory/product_list.html", {"products": products})
 
+
 @login_required
 def product_create(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, "Producto creado correctamente.")
             return redirect("product_list")
     else:
         form = ProductForm()
-    return render(request, "inventory/product_form.html", {"form": form, "title": "Nuevo producto"})
+
+    return render(
+        request,
+        "inventory/product_form.html",
+        {"form": form, "title": "Nuevo producto"},
+    )
 
 
 @login_required
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
             form.save()
+            messages.success(request, "Producto actualizado correctamente.")
             return redirect("product_list")
     else:
         form = ProductForm(instance=product)
-    return render(request, "inventory/product_form.html", {"form": form, "title": "Editar producto"})
+
+    return render(
+        request,
+        "inventory/product_form.html",
+        {"form": form, "title": "Editar producto"},
+    )
+
 
 @login_required
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
     if request.method == "POST":
         product.delete()
+        messages.success(request, "Producto eliminado.")
         return redirect("product_list")
-    return render(request, "inventory/product_confirm_delete.html", {"product": product})
+
+    return render(
+        request,
+        "inventory/product_confirm_delete.html",
+        {"product": product},
+    )
+
 
 @login_required
 def product_history(request, pk):
