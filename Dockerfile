@@ -1,25 +1,37 @@
-# Dockerfile para Inventrack (Django + Gunicorn)
-
+# Imagen base con Python 3.12
 FROM python:3.12-slim
 
-# No escribir .pyc y loguear sin buffer
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Variables para que Python no genere .pyc y use salida sin buffer
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Dependencias del sistema (para psycopg2, etc.)
+# Instalar dependencias del sistema (psycopg2 necesita libpq y build-essential)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependencias de Python
+# Copiar requirements y instalar dependencias
 COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copiar el código del proyecto
-COPY . /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Comando por defecto: levantar Gunicorn
+# Copiar el resto del código al contenedor
+COPY . /app
+
+# Crear usuario no root para ejecutar la app
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# Variables por defecto
+ENV DJANGO_SETTINGS_MODULE=config.settings \
+    PORT=8000
+
+# Si ya tienes STATIC_ROOT configurado, podrías hacer:
+# RUN python manage.py collectstatic --noinput
+
+# Comando de arranque: gunicorn sirviendo el WSGI de Django
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
