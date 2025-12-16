@@ -137,6 +137,19 @@ def export_movements_csv(request):
 
     return response
 
+@login_required
+def export_products_csv(request):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="products.csv"'
+    writer = csv.writer(response)
+
+    field_names = [f.name for f in Product._meta.fields]
+    writer.writerow(field_names)
+
+    for p in Product.objects.all():
+        writer.writerow([getattr(p, f) for f in field_names])
+
+    return response
 
 
 @login_required
@@ -228,17 +241,15 @@ def product_history(request, pk):
 
 
 @login_required
-def export_products_csv(request):
-    from .models import Product
-
+def export_movements_csv(request):
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="products.csv"'
-
+    response["Content-Disposition"] = 'attachment; filename="movements.csv"'
     writer = csv.writer(response)
-    field_names = [f.name for f in Product._meta.fields]
+
+    field_names = [f.name for f in Movement._meta.fields]
     writer.writerow(field_names)
 
-    for p in Product.objects.all():
-        writer.writerow([getattr(p, name) for name in field_names])
+    for m in Movement.objects.all():
+        writer.writerow([getattr(m, f) for f in field_names])
 
     return response
