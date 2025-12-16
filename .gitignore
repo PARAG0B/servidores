@@ -5,3 +5,10 @@ __pycache__/
 db.sqlite3
 *.sqlite3
 .env
+# Backups y dumps
+backups/
+*.sql
+
+# Archivos temporales / backups de editor
+*.save
+*.save.*
