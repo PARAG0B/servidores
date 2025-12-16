@@ -45,6 +45,7 @@ def dashboard(request):
     }
     return render(request, "inventory/dashboard.html", context)
 
+
 @login_required
 def movement_list(request):
     # Ahora sí, leemos de la base de datos
@@ -77,6 +78,8 @@ def export_products_csv(request):
     writer.writerow(["Código", "Nombre", "Stock mínimo", "Activo", "Stock total"])
 
     products = Product.objects.all().order_by("name")
+
+    # Totales por producto
     totals = (
         Stock.objects.values("product_id")
         .annotate(total=Sum("quantity"))
@@ -86,14 +89,15 @@ def export_products_csv(request):
     for p in products:
         total_stock = totals_by_product.get(p.id, 0)
         writer.writerow([
-            p.code,
+            getattr(p, "code", ""),        # por si código se llama code
             p.name,
-            getattr(p, "min_stock", ""),
-            getattr(p, "is_active", ""),
+            getattr(p, "min_stock", ""),   # si todavía no existe en algún momento, no revienta
+            getattr(p, "is_active", ""),   # idem
             total_stock,
         ])
 
     return response
+
 
 @login_required
 def export_movements_csv(request):
@@ -114,26 +118,38 @@ def export_movements_csv(request):
     movements = (
         Movement.objects
         .select_related("product", "warehouse_from", "warehouse_to", "user")
-        .order_by("-created_at")
+        .order_by("-id")   # más seguro que asumir created_at
     )
 
     for m in movements:
+        # Fecha: intentamos usar created_at, si no existe usamos created
+        created_value = getattr(m, "created_at", None)
+        if created_value is None:
+            created_value = getattr(m, "created", None)
+        if created_value is not None:
+            created_str = created_value.strftime("%Y-%m-%d %H:%M")
+        else:
+            created_str = ""
+
+        # Tipo legible si existe get_movement_type_display
         if hasattr(m, "get_movement_type_display"):
             movement_type = m.get_movement_type_display()
         else:
-            movement_type = m.movement_type
+            movement_type = getattr(m, "movement_type", "")
 
         writer.writerow([
-            m.created_at.strftime("%Y-%m-%d %H:%M"),
-            m.product.name if m.product_id else "",
+            created_str,
+            m.product.name if getattr(m, "product_id", None) else "",
             movement_type,
             m.quantity,
-            m.warehouse_from.name if m.warehouse_from_id else "",
-            m.warehouse_to.name if m.warehouse_to_id else "",
-            m.user.username if m.user_id else "",
+            m.warehouse_from.name if getattr(m, "warehouse_from_id", None) else "",
+            m.warehouse_to.name if getattr(m, "warehouse_to_id", None) else "",
+            m.user.username if getattr(m, "user_id", None) else "",
         ])
 
     return response
+
+
 
 @login_required
 def product_list(request):
