@@ -5,7 +5,7 @@
 {% block content %}
 <h1 class="mb-4">Eliminar producto</h1>
 
-<p>¿Seguro que deseas eliminar el producto <strong>{{ product.name }}</strong>?</p>
+<p>¿Seguro que deseas eliminar el producto <strong>{{ product }}</strong>?</p>
 
 <form method="post">
   {% csrf_token %}

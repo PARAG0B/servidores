@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, F
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-import csv
-
 from django.db import transaction
+from django.db.models import Sum
 
-from .models import Stock, Movement, Product
-from .forms import MovementForm, ProductForm
+from .models import Product, Stock, Movement
+from .forms import ProductForm, MovementForm
+import csv
 
 @login_required
 def dashboard(request):
@@ -68,32 +68,21 @@ def movement_create(request):
         {"form": form, "title": "Nuevo movimiento"},
     )
 
+
 @login_required
-def export_products_csv(request):
+def movement_export_csv(request):
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="inventrack_products.csv"'
+    response["Content-Disposition"] = 'attachment; filename="movements.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Código", "Nombre", "Stock mínimo", "Activo", "Stock total"])
 
-    products = Product.objects.all().order_by("name")
+    # Cabeceras dinámicas basadas en los campos del modelo
+    field_names = [f.name for f in Movement._meta.fields]
+    writer.writerow(field_names)
 
-    # Totales por producto
-    totals = (
-        Stock.objects.values("product_id")
-        .annotate(total=Sum("quantity"))
-    )
-    totals_by_product = {row["product_id"]: row["total"] for row in totals}
-
-    for p in products:
-        total_stock = totals_by_product.get(p.id, 0)
-        writer.writerow([
-            getattr(p, "code", ""),        # por si código se llama code
-            p.name,
-            getattr(p, "min_stock", ""),   # si todavía no existe en algún momento, no revienta
-            getattr(p, "is_active", ""),   # idem
-            total_stock,
-        ])
+    for m in Movement.objects.all():
+        row = [getattr(m, f) for f in field_names]
+        writer.writerow(row)
 
     return response
 
@@ -152,8 +141,20 @@ def export_movements_csv(request):
 
 @login_required
 def product_list(request):
-    products = Product.objects.all().order_by("name")
-    return render(request, "inventory/product_list.html", {"products": products})
+    products = Product.objects.all()
+
+    # Campos dinámicos del modelo, para no adivinar nombres
+    field_names = [f.name for f in Product._meta.fields]
+
+    rows = []
+    for p in products:
+        rows.append([getattr(p, f) for f in field_names])
+
+    context = {
+        "field_names": field_names,
+        "rows": rows,
+    }
+    return render(request, "inventory/product_list.html", context)
 
 
 @login_required
@@ -224,3 +225,19 @@ def product_history(request, pk):
         "inventory/product_history.html",
         {"product": product, "movements": movements},
     )
+
+@login_required
+def export_products_csv(request):
+    from .models import Product  # import aquí para evitar líos de import circular
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="products.csv"'
+
+    writer = csv.writer(response)
+
+    field_names = [f.name for f in Product._meta.fields]
+    writer.writerow(field_names)
+
+    for p in Product.objects.all():
+        writer.writerow([getattr(p, f) for f in field_names])
+
+    return response

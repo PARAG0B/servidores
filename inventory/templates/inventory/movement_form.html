@@ -1,23 +1,14 @@
 {% extends "inventory/base.html" %}
 
-{% block title %}Nuevo movimiento{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Registrar movimiento</h1>
-
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">
-    {% for error in form.non_field_errors %}
-      <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
+<h1 class="mb-4">{{ title }}</h1>
 
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a href="{% url 'inventory:movement_list' %}" class="btn btn-secondary">Cancelar</a>
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a href="{% url 'movement_list' %}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}

@@ -1,12 +1,14 @@
 {% extends "inventory/base.html" %}
 
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-<h1>{{ title }}</h1>
+<h1 class="mb-4">{{ title }}</h1>
 
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit" class="btn btn-success">Guardar</button>
+  <button type="submit" class="btn btn-primary">Guardar</button>
   <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}
