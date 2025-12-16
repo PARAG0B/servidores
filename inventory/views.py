@@ -9,10 +9,10 @@ from .forms import MovementForm, ProductForm
 
 @login_required
 def dashboard(request):
-    # Totales por producto
+    # Totales por producto (solo usamos nombre, nada raro)
     totals = (
         Stock.objects
-        .values("product__name", "product__code")
+        .values("product__name")
         .annotate(total=Sum("quantity"))
         .order_by("product__name")
     )
@@ -24,27 +24,13 @@ def dashboard(request):
         .order_by("warehouse__name", "product__name")
     )
 
-    # Productos con stock total por debajo del mínimo
-    low_stock = (
-        Stock.objects
-        .values("product__id", "product__name", "product__code", "product__min_stock")
-        .annotate(total=Sum("quantity"))
-        .filter(
-            product__min_stock__isnull=False,
-            product__min_stock__gt=0,
-            total__lt=F("product__min_stock"),
-        )
-        .order_by("product__name")
-    )
-
     context = {
         "totals": totals,
         "stocks": stocks,
-        "low_stock": low_stock,
-        "low_stock_count": low_stock.count(),
+        # Nada más, así el template no depende de low_stock ni cosas nuevas
     }
-    return render(request, "inventory/dashboard.html", context)
 
+    return render(request, "inventory/dashboard.html", context)
 
 @login_required
 def movement_list(request):
