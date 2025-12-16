@@ -17,5 +17,6 @@ urlpatterns = [
     # Movimientos
     path("movements/", views.movement_list, name="movement_list"),
     path("movements/create/", views.movement_create, name="movement_create"),
-    path("movements/export/csv/", views.export_movements_csv, name="movement_export"),
+    path("products/export/csv/", views.export_products_csv, name=" export_movements_csv"),
+    path("movements/new/", views.movement_create, name="movement_create"),
 ]
