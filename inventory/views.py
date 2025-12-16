@@ -37,8 +37,12 @@ from django.http import HttpResponse  # asegúrate de que este import esté arri
 
 @login_required
 def movement_list(request):
-    return HttpResponse("Movements OK (vista de prueba)")
- 
+    # Por ahora no consultamos la base de datos
+    # Solo probamos que el template cargue bien
+    context = {
+        "movements": [],
+    }
+    return render(request, "inventory/movement_list.html", context) 
 
 @login_required
 def movement_create(request):
