@@ -1,19 +1,15 @@
-import csv
-
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+import csv
 
+from .models import Stock, Movement, Product
 from .forms import MovementForm, ProductForm
-from .models import Movement, Product, Stock
-
 
 @login_required
 def dashboard(request):
-    # Totales por producto
+    # Totales por producto (tabla 1)
     totals = (
         Stock.objects
         .select_related("product")
@@ -22,10 +18,11 @@ def dashboard(request):
         .order_by("product__name")
     )
 
-    # Detalle por bodega
+    # Detalle por bodega (tabla 2)
     stocks = (
         Stock.objects
         .select_related("warehouse", "product")
+        .all()
         .order_by("warehouse__name", "product__name")
     )
 
@@ -35,102 +32,58 @@ def dashboard(request):
     }
     return render(request, "inventory/dashboard.html", context)
 
-
-@login_required
 def movement_list(request):
     movements = (
         Movement.objects
-        .select_related("warehouse", "product")
-        .order_by("-id")[:100]
+        .select_related("warehouse", "product", "user")
+        .order_by("-created_at")
     )
     return render(request, "inventory/movement_list.html", {"movements": movements})
-
 
 @login_required
 def movement_create(request):
     if request.method == "POST":
         form = MovementForm(request.POST)
         if form.is_valid():
-            try:
-                # Aquí se ejecuta Movement.save() con la lógica de stock
-                form.save()
-            except ValidationError as e:
-                form.add_error(None, e.message)
-            else:
-                messages.success(request, "Movimiento registrado correctamente.")
-                return redirect("inventory:movement_list")
+            movement = form.save(commit=False)
+            movement.user = request.user
+            movement.save()   # aquí se actualiza el stock
+            return redirect("movement_list")
     else:
         form = MovementForm()
-
     return render(request, "inventory/movement_form.html", {"form": form})
-
 
 @login_required
 def movement_export_csv(request):
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="movimientos_inventrack.csv"'
+    response["Content-Disposition"] = 'attachment; filename="movimientos.csv"'
 
     writer = csv.writer(response)
+    writer.writerow(["Fecha", "Bodega", "Producto", "Tipo", "Cantidad", "Referencia", "Usuario"])
 
-    writer.writerow([
-        "ID",
-        "Fecha / Hora",
-        "Tipo",
-        "Bodega",
-        "Producto",
-        "Cantidad",
-        "Referencia",
-        "Notas",
-    ])
-
-    movements = (
+    qs = (
         Movement.objects
-        .select_related("warehouse", "product")
-        .order_by("-id")
+        .select_related("warehouse", "product", "user")
+        .order_by("-created_at")
     )
 
-    for m in movements:
+    for m in qs:
         writer.writerow([
-            m.id,
-            m.created_at.strftime("%Y-%m-%d %H:%M") if hasattr(m, "created_at") and m.created_at else "",
-            getattr(m, "get_movement_type_display", lambda: m.movement_type)(),
-            str(m.warehouse),
-            str(m.product),
+            m.created_at.strftime("%Y-%m-%d %H:%M"),
+            m.warehouse.name if m.warehouse else "",
+            m.product.name if m.product else "",
+            m.get_movement_type_display(),
             m.quantity,
             m.reference or "",
-            (m.notes or "").replace("\n", " "),
+            m.user.username if m.user else "",
         ])
 
     return response
 
-
 @login_required
 def product_list(request):
     products = Product.objects.all().order_by("name")
-    context = {
-        "products": products,
-    }
-    return render(request, "inventory/product_list.html", context)
-
-
-@login_required
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-
-    movements = (
-        Movement.objects
-        .filter(product=product)
-        .select_related("warehouse")
-        .order_by("-id")
-    )
-
-    context = {
-        "product": product,
-        "movements": movements,
-    }
-    return render(request, "inventory/product_detail.html", context)
-
-
+    return render(request, "inventory/product_list.html", {"products": products})
 
 @login_required
 def product_create(request):
@@ -156,7 +109,6 @@ def product_update(request, pk):
         form = ProductForm(instance=product)
     return render(request, "inventory/product_form.html", {"form": form, "title": "Editar producto"})
 
-
 @login_required
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -164,7 +116,6 @@ def product_delete(request, pk):
         product.delete()
         return redirect("product_list")
     return render(request, "inventory/product_confirm_delete.html", {"product": product})
-
 
 @login_required
 def product_history(request, pk):
