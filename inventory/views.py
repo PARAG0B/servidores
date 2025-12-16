@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import csv
@@ -9,31 +9,41 @@ from .forms import MovementForm, ProductForm
 
 @login_required
 def dashboard(request):
-    # Totales por producto (tabla 1)
+    # Totales por producto
     totals = (
         Stock.objects
-        .select_related("product")
-        .values("product__name")
+        .values("product__name", "product__code")
         .annotate(total=Sum("quantity"))
         .order_by("product__name")
     )
 
-    # Detalle por bodega (tabla 2)
+    # Detalle por bodega
     stocks = (
         Stock.objects
         .select_related("warehouse", "product")
-        .all()
         .order_by("warehouse__name", "product__name")
+    )
+
+    # Productos con stock total por debajo del mínimo
+    low_stock = (
+        Stock.objects
+        .values("product__id", "product__name", "product__code", "product__min_stock")
+        .annotate(total=Sum("quantity"))
+        .filter(
+            product__min_stock__isnull=False,
+            product__min_stock__gt=0,
+            total__lt=F("product__min_stock"),
+        )
+        .order_by("product__name")
     )
 
     context = {
         "totals": totals,
         "stocks": stocks,
+        "low_stock": low_stock,
+        "low_stock_count": low_stock.count(),
     }
     return render(request, "inventory/dashboard.html", context)
-
-from django.http import HttpResponse  # asegúrate de que este import esté arriba
-
 
 @login_required
 def movement_list(request):
@@ -59,28 +69,68 @@ def movement_create(request):
     return render(request, "inventory/movement_form.html", {"form": form})
 
 @login_required
-def movement_export_csv(request):
+def export_products_csv(request):
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="movimientos.csv"'
+    response["Content-Disposition"] = 'attachment; filename="inventrack_products.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Fecha", "Bodega", "Producto", "Tipo", "Cantidad", "Referencia", "Usuario"])
+    writer.writerow(["Código", "Nombre", "Stock mínimo", "Activo", "Stock total"])
 
-    qs = (
+    products = Product.objects.all().order_by("name")
+    totals = (
+        Stock.objects.values("product_id")
+        .annotate(total=Sum("quantity"))
+    )
+    totals_by_product = {row["product_id"]: row["total"] for row in totals}
+
+    for p in products:
+        total_stock = totals_by_product.get(p.id, 0)
+        writer.writerow([
+            p.code,
+            p.name,
+            getattr(p, "min_stock", ""),
+            getattr(p, "is_active", ""),
+            total_stock,
+        ])
+
+    return response
+
+@login_required
+def export_movements_csv(request):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="inventrack_movements.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Fecha",
+        "Producto",
+        "Tipo",
+        "Cantidad",
+        "Bodega origen",
+        "Bodega destino",
+        "Usuario",
+    ])
+
+    movements = (
         Movement.objects
-        .select_related("warehouse", "product", "user")
+        .select_related("product", "warehouse_from", "warehouse_to", "user")
         .order_by("-created_at")
     )
 
-    for m in qs:
+    for m in movements:
+        if hasattr(m, "get_movement_type_display"):
+            movement_type = m.get_movement_type_display()
+        else:
+            movement_type = m.movement_type
+
         writer.writerow([
             m.created_at.strftime("%Y-%m-%d %H:%M"),
-            m.warehouse.name if m.warehouse else "",
-            m.product.name if m.product else "",
-            m.get_movement_type_display(),
+            m.product.name if m.product_id else "",
+            movement_type,
             m.quantity,
-            m.reference or "",
-            m.user.username if m.user else "",
+            m.warehouse_from.name if m.warehouse_from_id else "",
+            m.warehouse_to.name if m.warehouse_to_id else "",
+            m.user.username if m.user_id else "",
         ])
 
     return response

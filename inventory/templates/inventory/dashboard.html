@@ -5,6 +5,45 @@
 {% block content %}
 <h1 class="mb-4">Dashboard de existencias</h1>
 
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-secondary">
+            <div class="card-body">
+                <h5 class="card-title mb-1">Productos con stock bajo</h5>
+                <p class="display-6 mb-0">
+                    {{ low_stock_count }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Productos con stock bajo</h3>
+{% if low_stock %}
+<table class="table table-sm table-bordered mb-4">
+    <thead class="table-warning">
+    <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Stock total</th>
+        <th>Stock mínimo</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in low_stock %}
+        <tr class="table-warning">
+            <td>{{ item.product__code }}</td>
+            <td>{{ item.product__name }}</td>
+            <td>{{ item.total }}</td>
+            <td>{{ item.product__min_stock }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No hay productos con stock por debajo del mínimo.</p>
+{% endif %}
+
 <h3>Totales por producto</h3>
 <table class="table table-striped">
     <thead>
@@ -36,7 +75,7 @@
     </thead>
     <tbody>
     {% for stock in stocks %}
-        <tr>
+        <tr{% if stock.product.min_stock and stock.quantity < stock.product.min_stock %} class="table-danger"{% endif %}>
             <td>{{ stock.warehouse.name }}</td>
             <td>{{ stock.product.name }}</td>
             <td>{{ stock.quantity }}</td>

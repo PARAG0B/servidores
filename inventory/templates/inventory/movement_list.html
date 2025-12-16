@@ -3,11 +3,17 @@
 {% block title %}Movimientos{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Movimientos de inventario</h1>
 
-<div class="mb-3">
-    <a href="{% url 'movement_create' %}" class="btn btn-primary me-2">Nuevo movimiento</a>
-    <a href="{% url 'movement_export' %}" class="btn btn-outline-secondary">Exportar CSV</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Movimientos de inventario</h1>
+    <div>
+        <a href="{% url 'movement_create' %}" class="btn btn-primary me-2">
+            Nuevo movimiento
+        </a>
+        <a href="{% url 'movement_export' %}" class="btn btn-outline-secondary">
+            Exportar CSV
+        </a>
+    </div>
 </div>
 
 <table class="table table-striped table-sm">
