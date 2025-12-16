@@ -32,13 +32,13 @@ def dashboard(request):
     }
     return render(request, "inventory/dashboard.html", context)
 
+from django.http import HttpResponse  # asegúrate de que este import esté arriba
+
+
+@login_required
 def movement_list(request):
-    movements = (
-        Movement.objects
-        .select_related("warehouse", "product", "user")
-        .order_by("-created_at")
-    )
-    return render(request, "inventory/movement_list.html", {"movements": movements})
+    return HttpResponse("Movements OK (vista de prueba)")
+ 
 
 @login_required
 def movement_create(request):
