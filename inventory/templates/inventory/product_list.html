@@ -1,35 +1,64 @@
 {% extends "inventory/base.html" %}
 
 {% block title %}Productos{% endblock %}
+{% block page_title %}Productos{% endblock %}
+{% block page_subtitle %}Catálogo y administración de productos{% endblock %}
+
+{% block top_actions %}
+  <a href="{% url 'product_create' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-circle"></i> Nuevo producto
+  </a>
+{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Productos</h1>
+<div class="card card-soft">
+  <div class="card-body">
 
-<a href="{% url 'product_create' %}" class="btn btn-primary mb-3">Nuevo producto</a>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="mb-0"><i class="bi bi-box"></i> Listado</h5>
+      <span class="badge badge-soft">{{ rows|length }} productos</span>
+    </div>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      {% for field in field_names %}
-        <th>{{ field }}</th>
-      {% endfor %}
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in rows %}
-      <tr>
-        {% for value in row %}
-          <td>{{ value }}</td>
-        {% endfor %}
-        <td>
-          <a href="{% url 'product_update' row.0 %}" class="btn btn-sm btn-secondary">Editar</a>
-          <a href="{% url 'product_delete' row.0 %}" class="btn btn-sm btn-danger">Eliminar</a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="{{ field_names|length|add:'1' }}">No hay productos registrados.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            {% for field in field_names %}
+              <th>{{ field }}</th>
+            {% endfor %}
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              {% for value in row %}
+                <td>{{ value }}</td>
+              {% endfor %}
+
+              <td class="text-end">
+                <div class="btn-group" role="group">
+                  <a href="{% url 'product_update' row.0 %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
+                  <a href="{% url 'product_delete' row.0 %}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ field_names|length|add:'1' }}" class="text-center muted py-4">
+                No hay productos registrados.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
 {% endblock %}

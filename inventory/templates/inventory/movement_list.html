@@ -1,57 +1,76 @@
 {% extends "inventory/base.html" %}
 
 {% block title %}Movimientos{% endblock %}
+{% block page_title %}Movimientos{% endblock %}
+{% block page_subtitle %}Registro de entradas, salidas y ajustes{% endblock %}
+
+{% block top_actions %}
+  <a href="{% url 'movement_export' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-download"></i> Exportar CSV
+  </a>
+{% endblock %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Movimientos de inventario</h1>
-    <div>
-        <a href="{% url 'movement_create' %}" class="btn btn-primary me-2">
-            Nuevo movimiento
-        </a>
-        <a href="{% url 'movement_export' %}" class="btn btn-outline-secondary">
-            Exportar CSV
-        </a>
-    </div>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+  <div>
+    <h4 class="mb-0">Movimientos de inventario</h4>
+    <div class="muted small">Control y trazabilidad de operaciones</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'movement_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Nuevo movimiento
+    </a>
+    <a href="{% url 'movement_export' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-filetype-csv"></i> Exportar
+    </a>
+  </div>
 </div>
 
-<table class="table table-striped table-sm">
-    <thead>
-        <tr>
+<div class="card card-soft">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
             <th>ID</th>
             <th>Bodega</th>
             <th>Producto</th>
             <th>Tipo</th>
-            <th>Cantidad</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for m in movements %}
-        <tr>
-            <td>{{ m.id }}</td>
-            <td>
-                {% if m.warehouse %}
-                    {{ m.warehouse }}
+            <th class="text-end">Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in movements %}
+            <tr>
+              <td class="fw-semibold">#{{ m.id }}</td>
+
+              <td>{{ m.warehouse|default:"-" }}</td>
+              <td>{{ m.product|default:"-" }}</td>
+
+              <td>
+                {# Badge por tipo (ajusta nombres si tus choices son distintos) #}
+                {% if m.movement_type == "IN" or m.movement_type == "ENTRADA" %}
+                  <span class="badge text-bg-success"><i class="bi bi-arrow-down-circle"></i> {{ m.movement_type }}</span>
+                {% elif m.movement_type == "OUT" or m.movement_type == "SALIDA" %}
+                  <span class="badge text-bg-danger"><i class="bi bi-arrow-up-circle"></i> {{ m.movement_type }}</span>
                 {% else %}
-                    -
+                  <span class="badge text-bg-secondary"><i class="bi bi-sliders"></i> {{ m.movement_type }}</span>
                 {% endif %}
-            </td>
-            <td>
-                {% if m.product %}
-                    {{ m.product }}
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>{{ m.movement_type }}</td>
-            <td>{{ m.quantity }}</td>
-        </tr>
-    {% empty %}
-        <tr>
-            <td colspan="5">No hay movimientos registrados.</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+              </td>
+
+              <td class="text-end fw-semibold">{{ m.quantity }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="muted">No hay movimientos registrados.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -1,34 +1,57 @@
 {% extends "inventory/base.html" %}
 
+{% block title %}Historial - {{ product.name }}{% endblock %}
+{% block page_title %}Historial{% endblock %}
+{% block page_subtitle %}Movimientos del producto: {{ product.name }}{% endblock %}
+
+{% block top_actions %}
+  <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
 {% block content %}
-<h1>Historial de movimientos – {{ product.name }}</h1>
+<div class="card card-soft">
+  <div class="card-body">
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Bodega</th>
-      <th>Tipo</th>
-      <th>Cantidad</th>
-      <th>Referencia</th>
-      <th>Usuario</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for m in movements %}
-      <tr>
-        <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
-        <td>{{ m.warehouse.name }}</td>
-        <td>{{ m.get_movement_type_display }}</td>
-        <td>{{ m.quantity }}</td>
-        <td>{{ m.reference }}</td>
-        <td>{{ m.user.username }}</td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="6" class="text-center">No hay movimientos para este producto.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="mb-0"><i class="bi bi-list-check"></i> Movimientos</h5>
+      <span class="badge badge-soft">{{ movements|length }} registros</span>
+    </div>
 
-<a href="{% url 'product_list' %}" class="btn btn-secondary">Volver a productos</a>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Bodega</th>
+            <th>Tipo</th>
+            <th class="text-end">Cantidad</th>
+            <th>Referencia</th>
+            <th>Usuario</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in movements %}
+            <tr>
+              <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{{ m.warehouse.name|default:m.warehouse }}</td>
+              <td>
+                <span class="badge text-bg-secondary">
+                  {{ m.get_movement_type_display|default:m.movement_type }}
+                </span>
+              </td>
+              <td class="text-end fw-semibold">{{ m.quantity }}</td>
+              <td class="muted">{{ m.reference|default:"-" }}</td>
+              <td>{{ m.user.username|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="text-center muted py-4">No hay movimientos para este producto.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
 {% endblock %}

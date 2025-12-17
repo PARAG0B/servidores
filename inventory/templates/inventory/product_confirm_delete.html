@@ -1,15 +1,29 @@
 {% extends "inventory/base.html" %}
 
 {% block title %}Eliminar producto{% endblock %}
+{% block page_title %}Eliminar producto{% endblock %}
+{% block page_subtitle %}Esta acción no se puede deshacer{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Eliminar producto</h1>
+<div class="card card-soft">
+  <div class="card-body">
+    <div class="alert alert-danger d-flex align-items-start gap-2">
+      <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+      <div>
+        <div class="fw-semibold">Confirmación requerida</div>
+        <div class="small">¿Seguro que deseas eliminar el producto <b>{{ product }}</b>?</div>
+      </div>
+    </div>
 
-<p>¿Seguro que deseas eliminar el producto <strong>{{ product }}</strong>?</p>
-
-<form method="post">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-  <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancelar</a>
-</form>
+    <form method="post" class="d-flex flex-column flex-sm-row gap-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Sí, eliminar
+      </button>
+      <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Cancelar
+      </a>
+    </form>
+  </div>
+</div>
 {% endblock %}
