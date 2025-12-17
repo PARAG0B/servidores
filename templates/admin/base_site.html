@@ -3,13 +3,27 @@
 
 {% block title %}Inventrack – Panel de administración{% endblock %}
 
-{% block branding %}
-<h1 id="site-name">
-    <a href="{% url 'admin:index' %}">Inventrack • Panel de administración</a>
-</h1>
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 {% endblock %}
 
-{% block extrastyle %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/admin.css' %}">
+{% block branding %}
+  <div class="inv-admin-brand">
+    <a class="inv-admin-brand__link" href="{% url 'admin:index' %}">
+      <span class="inv-admin-brand__logo"><i class="bi bi-box-seam"></i></span>
+      <span class="inv-admin-brand__text">
+        <span class="inv-admin-brand__name">Inventrack</span>
+        <span class="inv-admin-brand__subtitle">Panel de administración</span>
+      </span>
+    </a>
+  </div>
+{% endblock %}
+
+{# Opcional: quita el "Django administration" del footer #}
+{% block footer %}
+  <div class="inv-admin-footer">
+    <span>© {% now "Y" %} Inventrack</span>
+  </div>
 {% endblock %}
