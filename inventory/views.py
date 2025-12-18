@@ -4,17 +4,9 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.db import transaction
 from django.db.models import Sum
-
-import io
-import qrcode
-from django.urls import reverse
-
 from .models import Product, Stock, Movement
 from .forms import ProductForm, MovementForm
 import csv
-
-
-
 
 @login_required
 def dashboard(request):
@@ -260,5 +252,3 @@ def export_movements_csv(request):
         writer.writerow([getattr(m, f) for f in field_names])
 
     return response
-
-

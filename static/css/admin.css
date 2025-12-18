@@ -1,169 +1,49 @@
-/* ========= Inventrack Admin Theme ========= */
-:root{
-  --inv-bg: #f6f7fb;
-  --inv-card: #ffffff;
-  --inv-text: #111827;
-  --inv-muted: #6b7280;
-  --inv-border: #e5e7eb;
-
-  --inv-brand: #111827;      /* header */
-  --inv-brand-2: #0b1220;    /* gradient end */
-  --inv-accent: #2563eb;     /* primary */
-  --inv-accent-2: #1d4ed8;
-
-  --inv-radius: 14px;
-  --inv-shadow: 0 10px 24px rgba(17,24,39,.08);
+/* Fuente más moderna */
+body, #content, #header, #content-main, .module {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* Fondo general */
-body, #container{
-  background: var(--inv-bg) !important;
-  color: var(--inv-text);
+/* Header oscuro tipo navbar de la app */
+#header {
+    background: #0d6efd;
+    color: #fff;
+    border-bottom: none;
 }
 
-/* Header (barra superior del admin) */
-#header{
-  background: linear-gradient(90deg, var(--inv-brand), var(--inv-brand-2)) !important;
-  border-bottom: 1px solid rgba(255,255,255,.10);
+#header a:link, #header a:visited {
+    color: #fff;
+    text-decoration: none;
 }
 
-/* Branding custom */
-.inv-admin-brand{
-  display:flex;
-  align-items:center;
-  height: 56px;
-}
-.inv-admin-brand__link{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  text-decoration:none !important;
-  color:#fff !important;
-}
-.inv-admin-brand__logo{
-  width: 40px;
-  height: 40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius: 12px;
-  background: rgba(37,99,235,.22);
-  border: 1px solid rgba(255,255,255,.15);
-  font-size: 18px;
-}
-.inv-admin-brand__text{
-  display:flex;
-  flex-direction:column;
-  line-height: 1.05;
-}
-.inv-admin-brand__name{
-  font-weight: 800;
-  letter-spacing: .2px;
-}
-.inv-admin-brand__subtitle{
-  font-size: 12px;
-  color: rgba(255,255,255,.70);
-  margin-top: 2px;
+/* Cuadros de los módulos */
+.module {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
 }
 
-/* Links del header (Welcome, View site, Change password, Log out) */
-#user-tools a{
-  color: rgba(255,255,255,.85) !important;
-  text-decoration: none;
-}
-#user-tools a:hover{
-  color: #fff !important;
-  text-decoration: underline;
+/* Título de cada módulo */
+.module h2 {
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 8px 8px 0 0;
 }
 
-/* Contenedor de contenido */
-#content{
-  padding: 18px 22px !important;
+/* Links generales */
+a:link, a:visited {
+    color: #0d6efd;
 }
 
-/* “migas” / breadcrumbs */
-.breadcrumbs{
-  background: transparent !important;
-  border: 0 !important;
-  color: var(--inv-muted) !important;
-  padding: 10px 22px !important;
+a:hover {
+    color: #0a58ca;
 }
 
-/* Módulos y cajas */
-.module, .dashboard .module, .app-auth .module, .inline-group{
-  background: var(--inv-card) !important;
-  border: 1px solid var(--inv-border) !important;
-  border-radius: var(--inv-radius) !important;
-  box-shadow: var(--inv-shadow);
-  overflow: hidden;
+/* Botón de logout */
+#user-tools a {
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
-/* Titulos de módulos */
-.module h2, .module caption, .inline-group h2{
-  background: #fff !important;
-  color: var(--inv-text) !important;
-  border-bottom: 1px solid var(--inv-border) !important;
-  font-weight: 800 !important;
-}
-
-/* Tablas */
-#changelist table{
-  border: 1px solid var(--inv-border);
-  border-radius: var(--inv-radius);
-  overflow: hidden;
-}
-#changelist table thead th{
-  background: #f9fafb !important;
-  color: var(--inv-muted) !important;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  font-size: 12px;
-}
-#changelist table tbody tr:hover{
-  background: #f9fafb !important;
-}
-
-/* Botones */
-.button, input[type=submit], input[type=button], .submit-row input, a.button{
-  border-radius: 12px !important;
-  padding: 10px 14px !important;
-  border: 1px solid rgba(37,99,235,.25) !important;
-  background: linear-gradient(180deg, var(--inv-accent), var(--inv-accent-2)) !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-}
-.button:hover, input[type=submit]:hover, a.button:hover{
-  filter: brightness(1.05);
-}
-
-/* Botón “Delete” */
-a.deletelink, .submit-row a.deletelink{
-  border-radius: 12px !important;
-  border: 1px solid rgba(239,68,68,.25) !important;
-  background: linear-gradient(180deg, #ef4444, #b91c1c) !important;
-  color: #fff !important;
-}
-
-/* Inputs y selects */
-input[type=text], input[type=password], input[type=email], input[type=number], textarea, select{
-  border-radius: 12px !important;
-  border: 1px solid var(--inv-border) !important;
-  padding: 10px 12px !important;
-}
-input:focus, textarea:focus, select:focus{
-  outline: none !important;
-  border-color: rgba(37,99,235,.55) !important;
-  box-shadow: 0 0 0 4px rgba(37,99,235,.12) !important;
-}
-
-/* Mensajes */
-.messagelist li{
-  border-radius: var(--inv-radius) !important;
-  box-shadow: 0 8px 18px rgba(17,24,39,.06);
-}
-
-/* Footer */
-.inv-admin-footer{
-  padding: 16px 22px;
-  color: var(--inv-muted);
+#user-tools a:last-child {
+    background: #dc3545;
+    color: #fff !important;
 }
