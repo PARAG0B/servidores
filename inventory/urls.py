@@ -17,6 +17,5 @@ urlpatterns = [
     path("movements/new/", views.movement_create, name="movement_create"),
     path("movements/export/csv/", views.export_movements_csv, name="movement_export"),
     
-    path("products/<int:pk>/qr/", views.product_qr, name="product_qr"),
-
+    
 ]

@@ -262,18 +262,3 @@ def export_movements_csv(request):
     return response
 
 
-@login_required
-def product_qr(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-
-    # URL destino del QR (puede ser history o detail)
-    target_url = request.build_absolute_uri(
-        reverse("product_history", args=[product.pk])
-    )
-
-    img = qrcode.make(target_url)
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-
-    return HttpResponse(buf.getvalue(), content_type="image/png")
