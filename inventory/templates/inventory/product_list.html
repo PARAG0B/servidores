@@ -26,6 +26,7 @@
             {% for field in field_names %}
               <th>{{ field }}</th>
             {% endfor %}
+            <th>QR</th>
             <th class="text-end">Acciones</th>
           </tr>
         </thead>
@@ -36,6 +37,17 @@
               {% for value in row %}
                 <td>{{ value }}</td>
               {% endfor %}
+
+              {# Asumo que row.0 es el ID (porque lo usas en update/delete) #}
+              <td>
+                <a href="{% url 'product_qr' row.0 %}" target="_blank" title="Abrir QR">
+                  <img
+                    src="{% url 'product_qr' row.0 %}"
+                    alt="QR Producto"
+                    style="width:64px;height:64px"
+                  >
+                </a>
+              </td>
 
               <td class="text-end">
                 <div class="btn-group" role="group">
@@ -50,7 +62,7 @@
             </tr>
           {% empty %}
             <tr>
-              <td colspan="{{ field_names|length|add:'1' }}" class="text-center muted py-4">
+              <td colspan="{{ field_names|length|add:'2' }}" class="text-center muted py-4">
                 No hay productos registrados.
               </td>
             </tr>

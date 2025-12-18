@@ -5,9 +5,16 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.db.models import Sum
 
+import io
+import qrcode
+from django.urls import reverse
+
 from .models import Product, Stock, Movement
 from .forms import ProductForm, MovementForm
 import csv
+
+
+
 
 @login_required
 def dashboard(request):
@@ -253,3 +260,20 @@ def export_movements_csv(request):
         writer.writerow([getattr(m, f) for f in field_names])
 
     return response
+
+
+@login_required
+def product_qr(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    # URL destino del QR (puede ser history o detail)
+    target_url = request.build_absolute_uri(
+        reverse("product_history", args=[product.pk])
+    )
+
+    img = qrcode.make(target_url)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    return HttpResponse(buf.getvalue(), content_type="image/png")
