@@ -11,6 +11,7 @@ import csv
 
 @login_required
 def dashboard(request):
+    # Totales por producto (solo usamos nombre, nada raro)
     totals = (
         Stock.objects
         .values("product__name")
@@ -18,30 +19,20 @@ def dashboard(request):
         .order_by("product__name")
     )
 
+    # Detalle por bodega
     stocks = (
         Stock.objects
         .select_related("warehouse", "product")
         .order_by("warehouse__name", "product__name")
     )
 
-    low_stock = (
-        Stock.objects
-        .values("product__sku", "product__name", "product__min_stock")
-        .annotate(total=Sum("quantity"))
-        .filter(product__min_stock__gt=0)
-        .filter(total__lt=F("product__min_stock"))
-        .order_by("product__name")
-    )
-
     context = {
         "totals": totals,
         "stocks": stocks,
-        "low_stock": low_stock,
-        "low_stock_count": low_stock.count(),
+        # Nada más, así el template no depende de low_stock ni cosas nuevas
     }
 
     return render(request, "inventory/dashboard.html", context)
-
 
 @login_required
 def movement_list(request):

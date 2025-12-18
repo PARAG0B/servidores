@@ -51,7 +51,7 @@
           <tbody>
             {% for item in low_stock %}
               <tr>
-                <td class="fw-semibold">{{ item.product__sku }}</td>
+                <td class="fw-semibold">{{ item.product__code }}</td>
                 <td>{{ item.product__name }}</td>
                 <td class="text-end">
                   <span class="badge badge-danger-soft">{{ item.total }}</span>

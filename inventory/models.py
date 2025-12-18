@@ -25,22 +25,14 @@ class Warehouse(models.Model):
 
 class Product(models.Model):
     sku = models.CharField(
-        "SKU",
-        max_length=30,
-        unique=True,
-        null=True,
-        blank=True,
-    )
+    "SKU",
+    max_length=30,
+    unique=True,
+    null=True,
+    blank=True,
+)
     name = models.CharField("Nombre", max_length=150)
     unit = models.CharField("Unidad", max_length=20, default="und")
-
-    # ✅ NUEVO: stock mínimo para alerta
-    min_stock = models.PositiveIntegerField(
-        "Stock mínimo",
-        default=0,
-        help_text="Cuando el stock total esté por debajo de este valor, se genera alerta."
-    )
-
     is_active = models.BooleanField("Activo", default=True)
 
     class Meta:
@@ -49,7 +41,6 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.sku} - {self.name}"
-
 
 
 class Stock(models.Model):
